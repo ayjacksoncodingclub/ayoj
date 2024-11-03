@@ -14,8 +14,8 @@ class LogUserAccessMiddleware(object):
                 not getattr(request, 'no_profile_update', False)):
             updates = {'last_access': now()}
             # Decided on using REMOTE_ADDR as nginx will translate it to the external IP that hits it.
-            if request.META.get('REMOTE_ADDR'):
-                updates['ip'] = request.META.get('REMOTE_ADDR')
+            if request.headers.get('CF-Connecting-IP'):
+                updates['ip'] = request.headers.get('CF-Connecting-IP')
             Profile.objects.filter(user_id=request.user.pk).update(**updates)
 
         return response
