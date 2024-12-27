@@ -1,19 +1,3 @@
-<h1 align="center">
-  <img src="https://github.com/DMOJ/online-judge/blob/master/logo.png?raw=true" width="120px">
-  <br>
-  DMOJ: Modern Online Judge
-</h1>
-<p align="center">
-  <a href="https://github.com/DMOJ/online-judge/actions?query=workflow%3Abuild">
-    <img alt="Build Status" src="https://img.shields.io/github/actions/workflow/status/DMOJ/online-judge/build.yml?branch=master"/>
-  </a>
-  <a href="LICENSE.md">
-    <img alt="License" src="https://img.shields.io/github/license/DMOJ/online-judge"/>
-  </a>
-  <a href="https://dmoj.ca/about/discord/">
-    <img src="https://img.shields.io/discord/677340492651954177?color=%237289DA&label=Discord"/>
-  </a>
-</p>
 
 A modern open-source online judge and contest platform system. It has been used to host thousands of competitions, including several national olympiads.
 
@@ -91,9 +75,9 @@ Use the site in whatever language you're most comfortable in &mdash; visit [tran
 ### Highly featured administration interface
 The DMOJ admin interface is highly versatile, and can be efficiently used for anything from managing users to authoring problem statements.
 
-![](https://static.dmoj.ca/data/_other/readme/problem-admin.png)
+![](https://dmoj.ml/data/_other/readme/problem-admin.png)
 
-![](https://static.dmoj.ca/data/_other/readme/admin-dashboard.png)
+![](https://dmoj.ml/data/_other/readme/admin-dashboard.png)
 
 ## Supported languages
 
@@ -102,7 +86,7 @@ Check out [**DMOJ/judge-server**](https://github.com/DMOJ/judge-server) for more
 Supported languages include:
 * C++ 11/14/17/20 (GCC and Clang)
 * C 99/11
-* Java 8-22
+* Java 8-19
 * Python 2/3
 * PyPy 2/3
 * Pascal
@@ -110,7 +94,6 @@ Supported languages include:
 
 The judge can also grade in the languages listed below:
 * Ada
-* Algol 68
 * AWK
 * COBOL
 * D

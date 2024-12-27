@@ -509,7 +509,7 @@ class CustomPasswordResetView(PasswordResetView):
     extra_email_context = {'site_admin_email': settings.SITE_ADMIN_EMAIL}
 
     def post(self, request, *args, **kwargs):
-        key = f'pwreset!{request.META["REMOTE_ADDR"]}'
+        key = f'pwreset!{request.headers["CF-Connecting-IP"]}'
         cache.add(key, 0, timeout=settings.DMOJ_PASSWORD_RESET_LIMIT_WINDOW * MINUTES_TO_SECONDS)
         if cache.incr(key) > settings.DMOJ_PASSWORD_RESET_LIMIT_COUNT:
             return HttpResponse(_('You have sent too many password reset requests. Please try again later.'),
@@ -575,7 +575,7 @@ class EmailChangeRequestView(LoginRequiredMixin, TitleMixin, FormView):
         return kwargs
 
     def post(self, request, *args, **kwargs):
-        key = f'emailchange!{request.META["REMOTE_ADDR"]}'
+        key = f'emailchange!{request.headers["CF-Connecting-IP"]}'
         cache.add(key, 0, timeout=settings.DMOJ_EMAIL_CHANGE_LIMIT_WINDOW * MINUTES_TO_SECONDS)
         if cache.incr(key) > settings.DMOJ_EMAIL_CHANGE_LIMIT_COUNT:
             return HttpResponse(_('You have sent too many email change requests. Please try again later.'),
