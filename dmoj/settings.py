@@ -272,7 +272,6 @@ INSTALLED_APPS += (
     'social_django',
     'compressor',
     'django_ace',
-    'pagedown',
     'sortedm2m',
     'statici18n',
     'impersonate',
@@ -498,7 +497,6 @@ MARTOR_ENABLE_CONFIGS = {
     'mention': 'true',
     'jquery': 'false',
     'living': 'false',
-    'spellcheck': 'false',
     'hljs': 'false',
 }
 MARTOR_MARKDOWNIFY_URL = '/widgets/preview/default'

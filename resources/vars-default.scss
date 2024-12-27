@@ -1,4 +1,4 @@
-@import "vars-common";
+@forward "vars-common";
 
 $is_light_theme: true;
 
@@ -22,6 +22,8 @@ $color_pageBg: #fff;
 
 // custom one-off colours
 $color_contest_ranking_disqualified: #ffa8a8;
+
+$color_martor_resize_dragger: #e8e8e8;
 
 $color_rating_none: #999;
 $color_rating_newbie: #999;

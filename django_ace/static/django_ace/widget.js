@@ -120,7 +120,6 @@
                         setEditorTheme(ev.matches);
                     })
                 }
-                
             }
         }
         if (wordwrap == "true") {

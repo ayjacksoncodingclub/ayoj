@@ -1,11 +1,14 @@
+from django.core.exceptions import PermissionDenied
 from django.db.models import TextField
 from django.forms import ModelForm, TextInput
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.urls import path, reverse
+from django.utils.decorators import method_decorator
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
+from django.views.decorators.http import require_POST
 from reversion.admin import VersionAdmin
 
 from django_ace import AceWidget
@@ -62,12 +65,12 @@ class JudgeAdmin(VersionAdmin):
     readonly_fields = ('created', 'online', 'start_time', 'ping', 'load', 'last_ip', 'runtimes', 'problems',
                        'is_disabled')
     fieldsets = (
-        (None, {'fields': ('name', 'auth_key', 'is_blocked', 'is_disabled')}),
+        (None, {'fields': ('name', 'auth_key', 'is_blocked', 'is_disabled', 'tier')}),
         (_('Description'), {'fields': ('description',)}),
         (_('Information'), {'fields': ('created', 'online', 'last_ip', 'start_time', 'ping', 'load')}),
         (_('Capabilities'), {'fields': ('runtimes',)}),
     )
-    list_display = ('name', 'online', 'is_disabled', 'start_time', 'ping', 'load', 'last_ip')
+    list_display = ('name', 'online', 'is_disabled', 'tier', 'start_time', 'ping', 'load', 'last_ip')
     ordering = ['-online', 'name']
     formfield_overrides = {
         TextField: {'widget': AdminMartorWidget},
@@ -84,14 +87,25 @@ class JudgeAdmin(VersionAdmin):
         judge.disconnect(force=force)
         return HttpResponseRedirect(reverse('admin:judge_judge_changelist'))
 
+    @method_decorator(require_POST)
     def disconnect_view(self, request, id):
+        judge = get_object_or_404(Judge, id=id)
+        if not self.has_change_permission(request, judge):
+            raise PermissionDenied()
         return self.disconnect_judge(id)
 
+    @method_decorator(require_POST)
     def terminate_view(self, request, id):
+        judge = get_object_or_404(Judge, id=id)
+        if not self.has_change_permission(request, judge):
+            raise PermissionDenied()
         return self.disconnect_judge(id, force=True)
 
+    @method_decorator(require_POST)
     def disable_view(self, request, id):
         judge = get_object_or_404(Judge, id=id)
+        if not self.has_change_permission(request, judge):
+            raise PermissionDenied()
         judge.toggle_disabled()
         return HttpResponseRedirect(reverse('admin:judge_judge_change', args=(judge.id,)))
 

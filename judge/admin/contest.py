@@ -1,4 +1,4 @@
-from adminsortable2.admin import SortableInlineAdminMixin
+from adminsortable2.admin import SortableAdminBase, SortableInlineAdminMixin
 from django.contrib import admin
 from django.core.exceptions import PermissionDenied
 from django.db import connection, transaction
@@ -8,8 +8,10 @@ from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.urls import path, reverse, reverse_lazy
 from django.utils import timezone
+from django.utils.decorators import method_decorator
 from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _, ngettext
+from django.views.decorators.http import require_POST
 from reversion.admin import VersionAdmin
 
 from django_ace import AceWidget
@@ -73,7 +75,7 @@ class ContestProblemInline(SortableInlineAdminMixin, admin.TabularInline):
     def rejudge_column(self, obj):
         if obj.id is None:
             return ''
-        return format_html('<a class="button rejudge-link" href="{0}">{1}</a>',
+        return format_html('<a class="button rejudge-link action-link" href="{0}">{1}</a>',
                            reverse('admin:judge_contest_rejudge', args=(obj.contest.id, obj.id)), _('Rejudge'))
 
 
@@ -115,7 +117,7 @@ class ContestForm(ModelForm):
         }
 
 
-class ContestAdmin(NoBatchDeleteMixin, VersionAdmin):
+class ContestAdmin(NoBatchDeleteMixin, SortableAdminBase, VersionAdmin):
     fieldsets = (
         (None, {'fields': ('key', 'name', 'authors', 'curators', 'testers', 'tester_see_submissions',
                            'tester_see_scoreboard', 'spectators')}),
@@ -235,7 +237,7 @@ class ContestAdmin(NoBatchDeleteMixin, VersionAdmin):
     def make_hidden(self, request, queryset):
         if not request.user.has_perm('judge.change_contest_visibility'):
             queryset = queryset.filter(Q(is_private=True) | Q(is_organization_private=True))
-        count = queryset.update(is_visible=True)
+        count = queryset.update(is_visible=False)
         self.message_user(request, ngettext('%d contest successfully marked as hidden.',
                                             '%d contests successfully marked as hidden.',
                                             count) % count)
@@ -272,7 +274,11 @@ class ContestAdmin(NoBatchDeleteMixin, VersionAdmin):
             path('<int:contest_id>/judge/<int:problem_id>/', self.rejudge_view, name='judge_contest_rejudge'),
         ] + super(ContestAdmin, self).get_urls()
 
+    @method_decorator(require_POST)
     def rejudge_view(self, request, contest_id, problem_id):
+        contest = get_object_or_404(Contest, id=contest_id)
+        if not self.has_change_permission(request, contest):
+            raise PermissionDenied()
         queryset = ContestSubmission.objects.filter(problem_id=problem_id).select_related('submission')
         for model in queryset:
             model.submission.judge(rejudge=True, rejudge_user=request.user)
@@ -282,6 +288,7 @@ class ContestAdmin(NoBatchDeleteMixin, VersionAdmin):
                                             len(queryset)) % len(queryset))
         return HttpResponseRedirect(reverse('admin:judge_contest_change', args=(contest_id,)))
 
+    @method_decorator(require_POST)
     def rate_all_view(self, request):
         if not request.user.has_perm('judge.contest_rating'):
             raise PermissionDenied()
@@ -293,6 +300,7 @@ class ContestAdmin(NoBatchDeleteMixin, VersionAdmin):
                 rate_contest(contest)
         return HttpResponseRedirect(reverse('admin:judge_contest_changelist'))
 
+    @method_decorator(require_POST)
     def rate_view(self, request, id):
         if not request.user.has_perm('judge.contest_rating'):
             raise PermissionDenied()
@@ -301,7 +309,7 @@ class ContestAdmin(NoBatchDeleteMixin, VersionAdmin):
             raise Http404()
         with transaction.atomic():
             contest.rate()
-        return HttpResponseRedirect(request.META.get('HTTP_REFERER', reverse('admin:judge_contest_changelist')))
+        return HttpResponseRedirect(request.headers.get('referer', reverse('admin:judge_contest_changelist')))
 
     def get_form(self, request, obj=None, **kwargs):
         form = super(ContestAdmin, self).get_form(request, obj, **kwargs)
