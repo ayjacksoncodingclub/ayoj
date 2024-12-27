@@ -12,8 +12,8 @@ from registration.forms import RegistrationForm
 from sortedm2m.forms import SortedMultipleChoiceField
 
 from judge.models import Language, Organization, Profile, TIMEZONE
-from judge.utils.mail import validate_email_domain
 from judge.utils.captcha import CaptchaField, ReCaptchaWidget
+from judge.utils.mail import validate_email_domain
 from judge.utils.subscription import Subscription, newsletter_id
 from judge.widgets import Select2MultipleWidget, Select2Widget
 
